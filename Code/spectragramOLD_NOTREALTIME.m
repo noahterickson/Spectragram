@@ -57,12 +57,6 @@ function spectragram
     iPanel = uipanel('parent',cPanel,'Title','Info Panel','Fontsize',12,...
         'BackgroundColor','white','units','normalized','Position',[.1 .04 .8 .4]);
     timeText = uicontrol('parent',iPanel,'Style','text','string',2);
-    colSliderCallback=('set(gca,''ylim'',[0 get(gcbo,''value'')])');
-
-    colSlider = uicontrol('parent',cPanel,'style','slider','units','normalized','position',...
-        [.1 .1 .3 .3],'callback',colSliderCallback,'min',0,'max',1,'value',100,...
-        'SliderStep',[0.0556 .2778]); %Change max and min here to change sliders
-    
         
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -71,8 +65,6 @@ function spectragram
     fs = 8000; %Sampling Frequency, to change with GUI
     %fs can be 8000, 11025, 22050, 44100, 48000, and 96000 Hz.
     %Determine hop size, must be less than 1, based off frequency
-    hopSize = .1;
-    hop = fs*hopSize;
     recTime = 0.125; %250millisecond record time THIS IS HOP SIZE, or HOP RATE
     %recTime = 0.0625 %is slower, recTime will change speed of
 
@@ -83,26 +75,15 @@ function spectragram
     timeArray = timeArray-20; %Shifts time array by -20s
     dataArray = timeArray+5000; %shifts input signal, TEMPORARY BEFORE FFT
     %dataArray = zeros(1,length(timeArray));
-    tempDataArray = 0:1/fs:20; %This array is for data calculations
-    recArray = tempDataArray; %array for FFT data
+    tempDataArray = 0:1/fs:recTime; %This array is for data calculations
+    calcArray = tempDataArray; %array for FFT data
 
-    recObj = audiorecorder(fs,8,1); %Initialize microphone with sampling frequency variable
-    record(recObj);
-    pause(1);
-    lastSampleIdx = 0;
-    resume(recObj);
-    
     x=1;%Set loops to infinite!
     while x == 1 %Infinite loop, CTRL+C to stop
 
-        recArray = getaudiodata(recObj); % Get audio data recordblocking
-        
-        if length(recArray) < lastSampleIdx+fs*hopSize
-            return;
-        end
-        
-        tempDataArray = recArray(lastSampleIdx+1:lastSampleIdx+fs*hopSize);
-        
+        recObj = audiorecorder(fs,8,1); %Initialize microphone with sampling frequency variable
+        recordblocking(recObj, recTime); %Record using microphone for recording time (seconds)
+        tempDataArray = getaudiodata(recObj); % Get audio data recordblocking
         %tempDataArray = rot90(tempDataArray); %rotate the array to match size
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -113,15 +94,12 @@ function spectragram
               
         %FILL ARRAY FORWARDS
         i = 1; 
-        while i<fs*hopSize+1 %this loop fills the dataArray with the "hop" data
+        while i<recTime*fs %this loop fills the dataArray with the "hop" data
             dataArray(i) = tempDataArray(i); %store the hop data
             i=i+1;
         end
      
-        
-        lastSampleIdx = lastSampleIdx + fs*hopSize;
-        dataArray = circshift(dataArray, [0 -fs*hopSize]); %Circleshift,
-        
+        dataArray = circshift(dataArray, [0 -recTime*fs]); %Circleshift,
 
         cla %CLA will clear the old dataArray plotted so the circshift doesnt plot over it
         hold on %keep the axes how the user has set them
@@ -129,8 +107,6 @@ function spectragram
         drawnow; %Is this needed??
         
     end
-    
-    stop(recObj);
 
     function fsBoxCallback(obj,event)
         x=0;
