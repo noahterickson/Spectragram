@@ -146,6 +146,13 @@ function spectrogramFINAL
         refreshValueLabel = uicontrol('parent',iPanel,'Style','text',...
             'units','normalized','Position',[0.05 .23 .5 .15],...
             'BackgroundColor','white','string','Display refresh');
+        refreshValueLabelHZ = uicontrol('parent',iPanel,'Style','text',...
+            'units','normalized','Position',[0.7 .23 .2 .15],...
+            'BackgroundColor','white','string','HZ');
+        refreshRate = 0; %Initialize refreshRate variable
+        refreshValue = uicontrol('parent',iPanel,'Style','text',...
+            'units','normalized','Position',[0.575 .23 .175 .15],...
+            'BackgroundColor','white','string',refreshRate);
         windowValue = uicontrol('parent',iPanel,'Style','text',...
             'units','normalized','position',[.6 .62 .3 .125],...
             'BackgroundColor','white','string',WIND);
@@ -185,17 +192,10 @@ function spectrogramFINAL
             dataMatrix(:,1: end-1)=dataMatrix(:,2:end); %shifts columns to the left to make room for new data
             dataMatrix(:,end) = (abs(fftData))'; %CData cannot be complex, so take absolute value
 
-            set(specPlot,'CData',dataMatrix); %update the color data of the matrix
+            set(specPlot,'CData',dataMatrix); %Update the specPlot c-axis data with the dataMatrix
 
-            drawnow; %updates image
-            
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            %%%%%%%%%%%%%%%%%%%%% MORE GUI STUFF AFTER FFT %%%%%%%%%%%%%%%%%%%%%%%%%
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            %this stuff actually bogs down the code like crazy
-            %refreshValue = uicontrol('parent',iPanel,'Style','text',...
-            %    'units','normalized','position',[.6 .25 .3 .125],...
-            %    'BackgroundColor','white','string',1/toc);
+            drawnow; %Updates image
+            set(refreshValue, 'string', round(1/toc)); %Update the refresh rate
         end
         
     function fsBoxCallback(obj,event)
