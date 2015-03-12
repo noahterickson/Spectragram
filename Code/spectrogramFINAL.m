@@ -11,26 +11,28 @@ function spectrogramFINAL
         %%%%%%%%%%%%%%%%%%%%%%%%%% INITIALUSER VARIABLES %%%%%%%%%%%%%%%%%%%%%%
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         fs = 8000; %Initial sampling frequency
-        WIND = 270; %Initial window size
+        WIND = 400; %Initial window size
         colOption = 'jet'; %Initial colormap
         spectragramRUN(fs, WIND, colOption) %Call the function to run
+        
     function spectragramRUN(fs, WIND, colOption)
         close all %closes all open figures
+        
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %%%%%%%%%%%%%%%%%%%%%%% ARRAY INITIALIZATION %%%%%%%%%%%%%%%%%%%%%%%%%%
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         hopRate = 0.05; %Hoprate of 50 ms, this translates to a 20Hz estimate rate
         hopSize = fs*hopRate; %How many datapoints to go in the hop, function of sampling rate
-        timeArray = -20:1:0; %Setup the time array 
+        timeArray = -20:1/fs:0; %Setup the time array 
         dataArray = transpose(timeArray); %Data array 
-        N = 2^nextpow2(WIND)*4; %N is the zero padding variable, function of window size
+        N = 2^nextpow2(WIND)*8; %N is the zero padding variable, function of window size
         if fs > 42000 %if high sampling rate, need sufficient zero padding, so increase it
             N = 2^12; %2048
             if fs > 47900 %Increase zero padding even more
                 N = 2^12; %4096
             end
         end
-        k = 1:(N/2)+1; %Half the FFT length
+        k = 1:(N/2)+1; %array full of half zero padding length 
         dataMatrix = zeros (length(k), 20/(hopRate)); %Initialize final matrix for spectrogram
         freq = (k-1)*fs/N; %Frequencies needed to plot in spectrogram axis
         
@@ -45,7 +47,7 @@ function spectrogramFINAL
         a = gca; %axis needed for housing spectrogram
         set(a, 'position',[.085 .085 .7 .9],'visible','off'); %Position the FFT
         specPlot = imagesc(dataMatrix,'parent',a,'EraseMode','None'); %Initialize spectrogram
-        caxis([0 100]); %Set the inital Caxis max to 100
+        caxis([1 10]); %Set the inital Caxis max to 100
         colormap(colOption); %Set the CData Color scheme
         set(gca,'YDir','normal'); %Set YDir to do top to bottom frequencies
         set(specPlot,'YData',freq); %Axis frequency data
@@ -138,6 +140,15 @@ function spectrogramFINAL
         colormapValueLabel = uicontrol('parent',iPanel,'Style','text',...
             'units','normalized','position',[.05 .1 .5 .1],...
             'BackgroundColor','white','string','Color Scheme');
+        windowValueLabel = uicontrol('parent',iPanel,'Style','text',...
+            'units','normalized','position',[.05 .62 .5 .15],...
+            'BackgroundColor','white','string','Window Size');
+        refreshValueLabel = uicontrol('parent',iPanel,'Style','text',...
+            'units','normalized','Position',[0.05 .23 .5 .15],...
+            'BackgroundColor','white','string','Display refresh');
+        windowValue = uicontrol('parent',iPanel,'Style','text',...
+            'units','normalized','position',[.6 .62 .3 .125],...
+            'BackgroundColor','white','string',WIND);
  
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %%%%%%%%%%%%%%%%%%%%% END OF GUI INITIALIZATION %%%%%%%%%%%%%%%%%%%%%%%%
@@ -150,29 +161,24 @@ function spectrogramFINAL
         record(recObj); %Start recording with microphone
         pause(.3); %pause the mic input for an arbitrary time to get initial data
         recArray = []; %Initialize array for audio input
-
+        actWIND = WIND;
         x=1;%Set loops to infinite!
         while x == 1 %Infinite loop, CTRL+C to stop
             tic;
             recArray = getaudiodata(recObj); %Get data from the microphone
             [recArrayRowSize, rec_c] = size(recArray);
-
             
-            if recArrayRowSize < hopSize+1
-                %dataArray(1:hopSize-recArrayRowSize,1)=0; %I dont think this is needed
+            if recArrayRowSize < hopSize+1 %recArrayRowSize always grows so this only really works at the beginning
                 dataArray((hopSize-recArrayRowSize+1):hopSize)=recArray;
             else
                 recArray = recArray((recArrayRowSize-hopSize+1):end,1);
-                dataArray(1:hopSize,1)=recArray;
+                dataArray(1:hopSize,1)=recArray; %Set 
             end
             
             %DETERMINE WINDOW SIZE
             if WIND > length(recArray) %we cant get more data in an array than is in an array
                 actWIND = length(recArray); %So if window is bigger than recarray size limit it
-            else
-                actWIND = WIND;
             end
-            
             
             fftData = fft(recArray(1:actWIND),N);
             fftData = fftData(k); %takes first half of the FFT, McNames explained this in class
@@ -181,25 +187,15 @@ function spectrogramFINAL
 
             set(specPlot,'CData',dataMatrix); %update the color data of the matrix
 
-            hold on %hold on!
-            drawnow %updates image
-
+            drawnow; %updates image
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %%%%%%%%%%%%%%%%%%%%% MORE GUI STUFF AFTER FFT %%%%%%%%%%%%%%%%%%%%%%%%%
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            windowValue = uicontrol('parent',iPanel,'Style','text',...
-                'units','normalized','position',[.6 .62 .3 .125],...
-                'BackgroundColor','white','string',actWIND);
-            windowValueLabel = uicontrol('parent',iPanel,'Style','text',...
-                'units','normalized','position',[.05 .62 .5 .15],...
-                'BackgroundColor','white','string','Window Size');
-            refreshValueLabel = uicontrol('parent',iPanel,'Style','text',...
-                'units','normalized','Position',[0.05 .23 .5 .15],...
-                'BackgroundColor','white','string','Display refresh');
-            refreshValue = uicontrol('parent',iPanel,'Style','text',...
-                'units','normalized','position',[.6 .25 .3 .125],...
-                'BackgroundColor','white','string',1/toc);
+            %this stuff actually bogs down the code like crazy
+            %refreshValue = uicontrol('parent',iPanel,'Style','text',...
+            %    'units','normalized','position',[.6 .25 .3 .125],...
+            %    'BackgroundColor','white','string',1/toc);
         end
         
     function fsBoxCallback(obj,event)
