@@ -1,0 +1,34 @@
+ant:
+<ant>
+  <mkdir dir="\\khensu\Home04\enoah\Desktop\Winter 2015\ECE312\spectrogram\Code\Spectrogram\for_redistribution" />
+  <mkdir dir="\\khensu\Home04\enoah\Desktop\Winter 2015\ECE312\spectrogram\Code\Spectrogram\for_testing" />
+</ant>
+mcc -C -o Spectrogram -W WinMain:Spectrogram -T link:exe -d '\\khensu\Home04\enoah\Desktop\Winter 2015\ECE312\spectrogram\Code\Spectrogram\for_testing' -v '\\khensu\Home04\enoah\Desktop\Winter 2015\ECE312\spectrogram\Code\spectrogramFINAL.m' 
+Compiler version: 5.0 (R2013b)
+Dependency analysis by DEPFUN.
+Processing C:\Program Files\MATLAB\R2013b\toolbox\matlab\win64\mcc.enc
+Processing C:\Program Files\MATLAB\R2013b\toolbox\shared\spcuilib\win64\mcc.enc
+Processing include files...
+2 item(s) added.
+Processing directories installed with MCR...
+The file \\khensu\Home04\enoah\Desktop\Winter 2015\ECE312\spectrogram\Code\Spectrogram\for_testing\mccExcludedFiles.log contains a list of functions excluded from the CTF archive.
+0 item(s) added.
+Generating MATLAB path for the compiled application...
+Created 55 path items.
+[Warning: Adding path "\\khensu\Home04\enoah\Desktop\Winter
+2015\ECE312\spectrogram\Code" to Compiler path instance.] 
+Parsing file "\\khensu\Home04\enoah\Desktop\Winter 2015\ECE312\spectrogram\Code\spectrogramFINAL.m"
+	(Referenced from: "Compiler Command Line").
+Parsing file "C:\Program Files\MATLAB\R2013b\toolbox\compiler\deploy\deployprint.m"
+	(Referenced from: "Compiler Command Line").
+Parsing file "C:\Program Files\MATLAB\R2013b\toolbox\compiler\deploy\printdlg.m"
+	(Referenced from: "Compiler Command Line").
+Deleting 0 temporary MEX authorization files.
+Generating file "\\khensu\Home04\enoah\Desktop\Winter 2015\ECE312\spectrogram\Code\Spectrogram\for_testing\readme.txt".
+Packaging...
+Adding custom icon C:\Program Files\MATLAB\R2013b\toolbox\compiler\Resources\default_icon.ico to \\khensu\Home04\enoah\Desktop\Winter 2015\ECE312\spectrogram\Code\Spectrogram\for_testing\Spectrogram.exe.
+Attempting to embed the CTF archive into your application $\\khensu\Home04\enoah\Desktop\Winter 2015\ECE312\spectrogram\Code\Spectrogram\for_testing\Spectrogram.exe.
+Finished embedding CTF archive. Deleting the external CTF archive.
+Creating the bundle...
+Web based installer created at \\khensu\Home04\enoah\Desktop\Winter 2015\ECE312\spectrogram\Code\Spectrogram\for_redistribution\MyAppInstaller_web.exe.
+Packaging complete.

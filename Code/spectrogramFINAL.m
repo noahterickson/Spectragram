@@ -23,8 +23,7 @@ function spectrogramFINAL
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         hopRate = 0.05; %Hoprate of 50 ms, this translates to a 20Hz estimate rate
         hopSize = fs*hopRate; %How many datapoints to go in the hop, function of sampling rate
-        timeArray = -20:1/fs:0; %Setup the time array 
-        dataArray = transpose(timeArray); %Data array 
+        timeArray = -20:1:0; %Setup the time array 
         N = 2^nextpow2(WIND)*8; %N is the zero padding variable, function of window size
         if fs > 42000 %if high sampling rate, need sufficient zero padding, so increase it
             N = 2^12; %2048
@@ -175,12 +174,8 @@ function spectrogramFINAL
             recArray = getaudiodata(recObj); %Get data from the microphone
             [recArrayRowSize, rec_c] = size(recArray);
             
-            if recArrayRowSize < hopSize+1 %recArrayRowSize always grows so this only really works at the beginning
-                dataArray((hopSize-recArrayRowSize+1):hopSize)=recArray;
-            else
-                recArray = recArray((recArrayRowSize-hopSize+1):end,1);
-                dataArray(1:hopSize,1)=recArray; %Set 
-            end
+
+            recArray = recArray((recArrayRowSize-hopSize+1):end,1);
             
             %DETERMINE WINDOW SIZE
             if WIND > length(recArray) %we cant get more data in an array than is in an array
